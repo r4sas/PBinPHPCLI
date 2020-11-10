@@ -24,7 +24,8 @@ $password = '';
 // Paste format ("plaintext", "syntaxhighlighting", "markdown")
 $formatter = 'plaintext';
 
-// Paste expire ("5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never")
+// Paste expire ("5min", "10min", "1hour", "1day", "1week",
+//               "1month", "1year", "never")
 $expire = '10min';
 
 // Enable discussion (true, false)
@@ -145,11 +146,13 @@ if(empty($opts) || isset($opts['h'])) {
   help();
 }
 
+$bypass = false;
+$textinputed = false;
+$paste = array();
+
 // Bypass mode check
 if(isset($opts['b'])) $bypass = true;
 
-$textinputed = false;
-$paste = array();
 
 foreach($opts as $opt => $value) {
   switch($opt) {
@@ -171,7 +174,8 @@ foreach($opts as $opt => $value) {
         }
         $data = "data:" . $mime . ";base64," . base64_encode($file);
         $name = basename($value);
-        $paste = array_merge($paste, ["attachment" => $data, "attachment_name" => $name]);
+        $paste = array_merge($paste, ["attachment" => $data,
+                                      "attachment_name" => $name]);
       } else {
         exit("Unable open file " . $value . PHP_EOL);
       }
@@ -180,12 +184,14 @@ foreach($opts as $opt => $value) {
       $password = $value;
       continue;
     case 'E':
-      if (in_array($value, ["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"]) || $bypass) {
+      if (in_array($value, ["5min", "10min", "1hour", "1day", "1week",
+                            "1month", "1year", "never"]) || $bypass) {
         $expire = $value;
       }
       continue;
     case 'B':
-      if($discussion) exit("You can't mess discussion and burn flags!" . PHP_EOL);
+      if($discussion) exit("You can't mess discussion and burn flags!" .
+                            PHP_EOL);
       $burn = true;
       continue;
     case 'D':
@@ -193,7 +199,8 @@ foreach($opts as $opt => $value) {
       $discussion = true;
       continue;
     case 'F':
-      if(in_array($value, ["plaintext", "syntaxhighlighting", "markdown"]) || $bypass) {
+      if(in_array($value, ["plaintext", "syntaxhighlighting", "markdown"])
+         || $bypass) {
         $formatter = $value;
       }
       continue;
@@ -232,7 +239,8 @@ if(!empty($password)) {
 
 $iv = openssl_random_pseudo_bytes($CIPHER_TAG_BYTES);
 $salt = openssl_random_pseudo_bytes($CIPHER_SALT_BYTES);
-$key = openssl_pbkdf2($pass, $salt, $CIPHER_BLOCK_BYTES, $CIPHER_ITER_COUNT, 'sha256');
+$key = openssl_pbkdf2($pass, $salt, $CIPHER_BLOCK_BYTES,
+                      $CIPHER_ITER_COUNT, 'sha256');
 
 $adata = array(
   array(
@@ -258,7 +266,9 @@ if($compression == 'zlib') {
   $pastedata = json_encode($paste);
 }
 
-$cipherText = openssl_encrypt($pastedata, 'aes-256-gcm', $key, $options=OPENSSL_RAW_DATA, $iv, $tag, $authdata, $CIPHER_TAG_BYTES);
+$cipherText = openssl_encrypt($pastedata, 'aes-256-gcm', $key,
+                              $options=OPENSSL_RAW_DATA, $iv, $tag,
+                              $authdata, $CIPHER_TAG_BYTES);
 $fulldata = array(
   'adata' => $adata,
   'ct' => base64_encode($cipherText . $tag),
@@ -298,7 +308,8 @@ $result = file_get_contents($url, false, $context);
 /* --- Check response code --- */
 preg_match('{HTTP\/\S*\s(\d{3})}', $http_response_header[0], $header);
 if ($header[1] !== "200") {
-  exit("Received incorrect response code (" . $header[1] . "). Check if you correctly set instance URL." . PHP_EOL);
+  exit("Received incorrect response code (" . $header[1] . "). " .
+    "Check if you correctly set instance URL." . PHP_EOL);
 }
 
 if($debug) {
@@ -308,7 +319,10 @@ if($debug) {
 
 $resp = json_decode($result, True);
 if($resp['status'] === 0) {
-  exit("Successfully sent! Link: " . $url . "?" . $resp['id'] . "#" . $passhash . PHP_EOL);
+  exit("-- Successfully sent! --" . PHP_EOL .
+    "Paste Link:\t" . $url . "?" . $resp['id'] . "#" . $passhash . PHP_EOL .
+    "Detele Link:\t" . $url . "?pasteid=" . $resp['id'] . "&deletetoken=" .
+    $resp['deletetoken'] . PHP_EOL);
 } else {
   exit("Error: " . $resp['message'] . PHP_EOL);
 }
