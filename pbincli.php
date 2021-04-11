@@ -215,7 +215,7 @@ foreach($opts as $opt => $value) {
         // URL must ends with slash!
         $url .= '/';
       }
-      continue2 ;
+      continue 2;
     case 'd':
       $debug = true;
       continue 2;
