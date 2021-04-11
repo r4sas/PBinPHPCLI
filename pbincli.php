@@ -157,13 +157,13 @@ if(isset($opts['b'])) $bypass = true;
 foreach($opts as $opt => $value) {
   switch($opt) {
     case 't':
-      if(isset($opts['T']) || isset($paste['paste'])) continue;
+      if(isset($opts['T']) || isset($paste['paste'])) continue 2;
       $paste = array_merge($paste, ["paste" => $value]);
-      continue;
+      continue 2;
     case 'T':
       $input_data = stream_get_contents(STDIN);
       $paste = array_merge($paste, ["paste" => $input_data]);
-      continue;
+      continue 2;
     case 'f':
       $file = file_get_contents($value);
       if ($file) {
@@ -179,7 +179,7 @@ foreach($opts as $opt => $value) {
       } else {
         exit("Unable open file " . $value . PHP_EOL);
       }
-      continue;
+      continue 2;
     case 'p':
       $password = $value;
       continue;
@@ -188,39 +188,37 @@ foreach($opts as $opt => $value) {
                             "1month", "1year", "never"]) || $bypass) {
         $expire = $value;
       }
-      continue;
+      continue 2;
     case 'B':
       if($discussion) exit("You can't mess discussion and burn flags!" .
                             PHP_EOL);
       $burn = true;
-      continue;
+      continue 2;
     case 'D':
       if($burn) exit("You can't mess discussion and burn flags!" . PHP_EOL);
       $discussion = true;
-      continue;
+      continue 2;
     case 'F':
       if(in_array($value, ["plaintext", "syntaxhighlighting", "markdown"])
          || $bypass) {
         $formatter = $value;
       }
-      continue;
+      continue 2;
     case 'c':
       if(in_array($value, ["zlib", "none"])) {
         $compression = $value;
       }
-      continue;
+      continue 2;
     case 's':
       $url = $value;
       if (substr($url, -1) !== '/') {
         // URL must ends with slash!
         $url .= '/';
       }
-      continue;
+      continue2 ;
     case 'd':
       $debug = true;
-      continue;
-    default:
-      continue;
+      continue 2;
   }
 }
 
