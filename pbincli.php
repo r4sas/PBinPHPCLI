@@ -182,7 +182,7 @@ foreach($opts as $opt => $value) {
       continue 2;
     case 'p':
       $password = $value;
-      continue;
+      continue 2;
     case 'E':
       if (in_array($value, ["5min", "10min", "1hour", "1day", "1week",
                             "1month", "1year", "never"]) || $bypass) {
